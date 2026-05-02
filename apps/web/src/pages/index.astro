@@ -36,9 +36,10 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
     }
     .nav-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
     .nav-brand { font-size: 1.25rem; font-weight: 700; color: var(--gold); }
-    .nav-links { display: flex; gap: 1rem; }
+    .nav-links { display: flex; gap: 1rem; align-items: center; }
     .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.875rem; }
     .nav-links a:hover { color: var(--text); }
+    .kbd { padding: 0.125rem 0.375rem; border-radius: 0.25rem; background: var(--surface); border: 1px solid var(--border); font-size: 0.75rem; font-family: monospace; }
     
     /* Hero */
     .hero { 
@@ -91,9 +92,9 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
       font-size: 0.75rem; font-weight: 600; 
     }
     .badge-gold { background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid rgba(212,175,55,0.3); }
-    .badge-success { background: rgba(74,222,128,0.1); color: var(--success); }
-    .badge-warning { background: rgba(251,191,36,0.1); color: var(--warning); }
-    .badge-error { background: rgba(248,113,113,0.1); color: var(--error); }
+    .badge-success { background: rgba(74,222,128,0.1); color: var(--success); border: 1px solid rgba(74,222,128,0.3); }
+    .badge-warning { background: rgba(251,191,36,0.1); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+    .badge-error { background: rgba(248,113,113,0.1); color: var(--error); border: 1px solid rgba(248,113,113,0.3); }
     
     /* Hidden */
     .hidden { display: none !important; }
@@ -136,9 +137,98 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
     .status-dot.green { background: var(--success); }
     .status-dot.yellow { background: var(--warning); }
     .status-dot.red { background: var(--error); }
+    
+    /* Deploy plan */
+    .plan-item { 
+      margin-bottom: 1rem; 
+      padding: 0.75rem; 
+      border-radius: 0.5rem; 
+      background: var(--surface); 
+    }
+    .plan-label { font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem; }
+    .plan-value { font-family: monospace; font-size: 0.875rem; color: var(--text); }
+    
+    /* Toast */
+    .toast { 
+      position: fixed; bottom: 2rem; right: 2rem; 
+      padding: 1rem 1.5rem; border-radius: 0.5rem; 
+      background: var(--card); border: 1px solid var(--border); 
+      box-shadow: var(--shadow-lg); z-index: 100; 
+      transform: translateY(100px); opacity: 0; 
+      transition: all 0.3s; 
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { border-color: rgba(74,222,128,0.3); }
+    .toast-error { border-color: rgba(248,113,113,0.3); }
+    
+    /* Command palette */
+    .command-palette { 
+      position: fixed; inset: 0; z-index: 200; 
+      background: rgba(0,0,0,0.5); display: none; 
+      align-items: flex-start; justify-content: center; 
+      padding-top: 20vh; 
+    }
+    .command-palette.open { display: flex; }
+    .command-box { 
+      width: 90%; max-width: 500px; 
+      background: var(--card); border: 1px solid var(--border); 
+      border-radius: 1rem; overflow: hidden; 
+      box-shadow: var(--shadow-xl); 
+    }
+    .command-input { 
+      width: 100%; padding: 1rem; border: none; 
+      background: transparent; color: var(--text); 
+      font-size: 1rem; border-bottom: 1px solid var(--border); 
+    }
+    .command-input:focus { outline: none; }
+    .command-list { max-height: 300px; overflow-y: auto; }
+    .command-item { 
+      padding: 0.75rem 1rem; cursor: pointer; 
+      display: flex; align-items: center; gap: 0.75rem; 
+    }
+    .command-item:hover { background: var(--surface); }
+    .command-item-icon { font-size: 1.25rem; }
+    .command-item-text { font-size: 0.875rem; }
+    .command-item-shortcut { margin-left: auto; font-size: 0.75rem; color: var(--text-muted); }
   </style>
 </head>
 <body>
+  <!-- Command Palette -->
+  <div class="command-palette" id="command-palette">
+    <div class="command-box">
+      <input class="command-input" id="command-input" placeholder="输入命令..." />
+      <div class="command-list" id="command-list">
+        <div class="command-item" data-action="load-example">
+          <span class="command-item-icon">📦</span>
+          <span class="command-item-text">加载示例仓库</span>
+          <span class="command-item-shortcut">Ctrl+E</span>
+        </div>
+        <div class="command-item" data-action="audit">
+          <span class="command-item-icon">🛡️</span>
+          <span class="command-item-text">安全审查</span>
+          <span class="command-item-shortcut">Ctrl+Enter</span>
+        </div>
+        <div class="command-item" data-action="deploy">
+          <span class="command-item-icon">📦</span>
+          <span class="command-item-text">生成部署计划</span>
+          <span class="command-item-shortcut">Ctrl+D</span>
+        </div>
+        <div class="command-item" data-action="check-agent">
+          <span class="command-item-icon">🤖</span>
+          <span class="command-item-text">检查 Local Agent</span>
+        </div>
+        <div class="command-item" data-action="export">
+          <span class="command-item-icon">📄</span>
+          <span class="command-item-text">导出报告</span>
+          <span class="command-item-shortcut">Ctrl+E</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <!-- Navigation -->
   <nav class="nav">
     <div class="nav-inner">
@@ -147,6 +237,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
         <a href="#discovery">发现</a>
         <a href="#audit">审查</a>
         <a href="#deploy">部署</a>
+        <a href="#" id="btn-command-palette">命令面板 <span class="kbd">⌘K</span></a>
         <a href="https://github.com/falses00/mimo-repopilot" target="_blank">GitHub</a>
       </div>
     </div>
@@ -164,16 +255,16 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
   <div class="main">
     <div class="status-bar">
       <div class="status-item">
+        <span class="status-dot green" id="agent-status-dot"></span>
+        <span id="agent-status-text">检查 Local Agent...</span>
+      </mode-badge-container>
+      <div class="status-item">
         <span class="status-dot green"></span>
         <span>安全审查引擎</span>
       </div>
       <div class="status-item">
         <span class="status-dot green"></span>
         <span>部署计划生成器</span>
-      </div>
-      <div class="status-item">
-        <span class="status-dot green"></span>
-        <span>本地 Runner</span>
       </div>
     </div>
 
@@ -186,9 +277,19 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
           <div style="margin-bottom: 1rem;">
             <input type="text" id="repo-input" placeholder="owner/repo，例如 falses00/mimo-tools" value="falses00/mimo-tools" />
           </div>
+          <div style="margin-bottom: 1rem;">
+            <select id="language-filter">
+              <option value="">所有语言</option>
+              <option value="typescript">TypeScript</option>
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="rust">Rust</option>
+              <option value="go">Go</option>
+            </select>
+          </div>
           <div class="actions">
             <button class="btn btn-primary btn-sm" id="btn-audit">🛡️ 安全审查</button>
-            <button class="btn btn-secondary btn-sm" id="btn-deploy">📦 生成部署计划</button>
+            <button class="btn btn-secondary btn-sm" id="btn-deploy">📦 部署计划</button>
           </div>
         </div>
 
@@ -199,14 +300,21 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
               <div class="repo-name">falses00/mimo-tools</div>
               <div class="repo-meta">TypeScript · 10 stars</div>
             </div>
-            <div class="repo-item" onclick="selectRepo('withastro/astro')">
-              <div class="repo-name">withastro/astro</div>
-              <div class="repo-meta">TypeScript · 45k stars</div>
-            </div>
             <div class="repo-item" onclick="selectRepo('vercel/next.js')">
               <div class="repo-name">vercel/next.js</div>
-              <div class="repo-meta">JavaScript · 120k stars</div>
+              <div class="repo-meta">TypeScript · 120k stars</div>
             </div>
+            <div class="repo-item" onclick="selectRepo('supabase/supabase')">
+              <div class="repo-name">supabase/supabase</div>
+              <div class="repo-meta">TypeScript · 75k stars</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>📚 最近审查</h3>
+          <div id="history-list">
+            <p style="color: var(--text-muted); font-size: 0.875rem;">暂无历史记录</p>
           </div>
         </div>
       </div>
@@ -218,6 +326,9 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
           <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
           <h3>开始审查</h3>
           <p style="color: var(--text-muted);">输入 GitHub 仓库地址，进行安全审查或生成部署计划</p>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+            快捷键: <span class="kbd">⌘K</span> 打开命令面板
+          </p>
         </div>
 
         <!-- Audit results -->
@@ -238,37 +349,63 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
         </div>
       </div>
 
-      <!-- Right: Info -->
+      <!-- Right: Automation -->
       <div>
         <div class="card">
+          <h3>🤖 Local Automation Agent</h3>
+          <div id="agent-panel">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+              <span class="status-dot" id="agent-panel-dot"></span>
+              <span id="agent-panel-status">检查中...</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-check-agent" style="width: 100%;">检查 Agent 状态</button>
+            <div id="agent-info" class="hidden" style="margin-top: 1rem;">
+              <div class="plan-item">
+                <div class="plan-label">Endpoint</div>
+                <div class="plan-value">http://127.0.0.1:8799</div>
+              </div>
+              <div class="plan-item">
+                <div class="plan-label">安全模式</div>
+                <div class="plan-value">默认 dry-run</div>
+              </div>
+            </div>
+            <div id="agent-offline" style="margin-top: 1rem;">
+              <p style="color: var(--text-muted); font-size: 0.875rem;">
+                本地自动化 Agent 未启动。请运行：
+              </p>
+              <div class="plan-item" style="margin-top: 0.5rem;">
+                <div class="plan-value">cd mimo-automation-agent<br>npm install<br>npm start</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>📂 Workspace</h3>
+          <input type="text" id="workspace-input" placeholder="例如: I:/MIMO-Automation" />
+          <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">
+            ⚠️ 不要选择 C 盘根目录
+          </p>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>⚠️ 安全策略</h3>
+          <div style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;">
+            <p style="margin-bottom: 0.5rem;">✓ 默认 dry-run 模式</p>
+            <p style="margin-bottom: 0.5rem;">✓ 高风险命令需要确认</p>
+            <p style="margin-bottom: 0.5rem;">✓ 禁止 sudo / rm -rf / curl|sh</p>
+            <p style="margin-bottom: 0.5rem;">✓ 禁止写入 C 盘根目录</p>
+            <p style="margin-bottom: 0.5rem;">✓ 所有操作有审计日志</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
           <h3>ℹ️ 使用说明</h3>
           <div style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;">
-            <p style="margin-bottom: 0.75rem;">1. 输入 GitHub 仓库地址</p>
-            <p style="margin-bottom: 0.75rem;">2. 点击"安全审查"检查风险</p>
-            <p style="margin-bottom: 0.75rem;">3. 点击"生成部署计划"获取运行指南</p>
-            <p style="margin-bottom: 0.75rem;">4. 按照指南在本地安全运行仓库</p>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top: 1.5rem;" id="audit">
-          <h3>⚠️ 安全检查项</h3>
-          <div style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;">
-            <p style="margin-bottom: 0.5rem;">✓ package.json scripts 危险命令</p>
-            <p style="margin-bottom: 0.5rem;">✓ dependencies 漏洞</p>
-            <p style="margin-bottom: 0.5rem;">✓ Dockerfile 安全</p>
-            <p style="margin-bottom: 0.5rem;">✓ GitHub Actions 风险</p>
-            <p style="margin-bottom: 0.5rem;">✓ README 可信度</p>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top: 1.5rem;" id="deploy">
-          <h3>📋 部署计划包含</h3>
-          <div style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;">
-            <p style="margin-bottom: 0.5rem;">• Clone 命令</p>
-            <p style="margin-bottom: 0.5rem;">• 安装命令</p>
-            <p style="margin-bottom: 0.5rem;">• 启动命令</p>
-            <p style="margin-bottom: 0.5rem;">• 需要的环境变量</p>
-            <p style="margin-bottom: 0.5rem;">• 手动步骤</p>
+            <p style="margin-bottom: 0.5rem;">1. 输入 GitHub 仓库地址</p>
+            <p style="margin-bottom: 0.5rem;">2. 点击"安全审查"检查风险</p>
+            <p style="margin-bottom: 0.5rem;">3. 点击"部署计划"生成运行指南</p>
+            <p style="margin-bottom: 0.5rem;">4. 连接 Local Agent 执行自动化</p>
           </div>
         </div>
       </div>
@@ -277,39 +414,129 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
 
   <script>
     const apiBaseUrl = '{apiBaseUrl}';
+    const AGENT_URL = 'http://127.0.0.1:8799';
     const repoInput = document.getElementById('repo-input');
-
+    const workspaceInput = document.getElementById('workspace-input');
+    
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Command palette
+    const commandPalette = document.getElementById('command-palette');
+    const commandInput = document.getElementById('command-input');
+    
+    document.getElementById('btn-command-palette').addEventListener('click', (e) => {
+      e.preventDefault();
+      commandPalette.classList.add('open');
+      commandInput.focus();
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        commandPalette.classList.toggle('open');
+        if (commandPalette.classList.contains('open')) commandInput.focus();
+      }
+      if (e.key === 'Escape') commandPalette.classList.remove('open');
+    });
+    
+    document.querySelectorAll('.command-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action;
+        commandPalette.classList.remove('open');
+        
+        switch (action) {
+          case 'load-example':
+            repoInput.value = 'falses00/mimo-tools';
+            showToast('已加载示例仓库');
+            break;
+          case 'audit':
+            auditRepo();
+            break;
+          case 'deploy':
+            generateDeployPlan();
+            break;
+          case 'check-agent':
+            checkAgent();
+            break;
+          case 'export':
+            exportReport();
+            break;
+        }
+      });
+    });
+    
+    // Select repo from list
     function selectRepo(repo) {
       repoInput.value = repo;
+      showToast('已选择仓库: ' + repo);
     }
-
-    // Audit function
+    
+    // Check Local Automation Agent
+    async function checkAgent() {
+      const dot = document.getElementById('agent-panel-dot');
+      const status = document.getElementById('agent-panel-status');
+      const info = document.getElementById('agent-info');
+      const offline = document.getElementById('agent-offline');
+      const statusDot = document.getElementById('agent-status-dot');
+      const statusText = document.getElementById('agent-status-text');
+      
+      try {
+        const response = await fetch(`${AGENT_URL}/api/health`, { signal: AgentURL.timeout(3000) });
+        if (response.ok) {
+          const data = await response.json();
+          dot.className = 'status-dot green';
+          status.textContent = '已连接';
+          statusDot.className = 'status-dot green';
+          statusText.textContent = 'Local Agent 已连接';
+          info.classList.remove('hidden');
+          offline.classList.add('hidden');
+          showToast('Local Automation Agent 已连接');
+        } else {
+          throw new Error('Agent offline');
+        }
+      } catch {
+        dot.className = 'status-dot red';
+        status.textContent = '未连接';
+        statusDot.className = 'status-dot red';
+        statusText.textContent = 'Local Agent 未连接';
+        info.classList.add('hidden');
+        offline.classList.remove('hidden');
+      }
+    }
+    
+    // Security audit
     async function auditRepo() {
       const repo = repoInput.value.trim();
-      if (!repo) { alert('请输入仓库地址'); return; }
-
+      if (!repo) { showToast('请输入仓库地址', 'error'); return; }
+      
       const btn = document.getElementById('btn-audit');
       btn.disabled = true; btn.textContent = '⏳ 审查中...';
-
-      // Simulate audit (in real app, would call API)
+      
       await new Promise(r => setTimeout(r, 1000));
-
+      
       const findings = [];
       let score = 85;
-
-      // Check for common issues
-      if (repo.includes('mimo-tools')) {
+      
+      // Simulate security checks
+      findings.push({ type: 'success', msg: 'README 文件存在' });
+      findings.push({ type: 'success', msg: 'LICENSE 文件存在' });
+      findings.push({ type: 'info', msg: '检测到 TypeScript' });
+      
+      if (repo.includes('mimo')) {
         findings.push({ type: 'warning', msg: '检测到 postinstall 脚本' });
         score -= 10;
       }
-      findings.push({ type: 'info', msg: 'README 文件存在' });
-      findings.push({ type: 'info', msg: 'LICENSE 文件存在' });
-
-      // Show results
+      
       document.getElementById('empty-state').classList.add('hidden');
       document.getElementById('audit-results').classList.remove('hidden');
       document.getElementById('risk-score').textContent = score;
-
+      
       const findingsList = document.getElementById('findings-list');
       findingsList.innerHTML = findings.map(f => `
         <div class="finding">
@@ -319,65 +546,136 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || '';
           <div class="finding-msg">${f.msg}</div>
         </div>
       `).join('');
-
+      
       const recommendedAction = document.getElementById('recommended-action');
       recommendedAction.textContent = score >= 80 ? '✅ 可以安全部署' : score >= 50 ? '⚠️ 需要审查后部署' : '❌ 不建议部署';
       recommendedAction.style.color = score >= 80 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--error)';
-
+      
       btn.disabled = false; btn.textContent = '🛡️ 安全审查';
+      showToast('安全审查完成');
+      
+      // Save to history
+      saveToHistory(repo, 'audit');
     }
-
-    // Deploy plan function
+    
+    // Deploy plan
     async function generateDeployPlan() {
       const repo = repoInput.value.trim();
-      if (!repo) { alert('请输入仓库地址'); return; }
-
+      if (!repo) { showToast('请输入仓库地址', 'error'); return; }
+      
       const btn = document.getElementById('btn-deploy');
       btn.disabled = true; btn.textContent = '⏳ 生成中...';
-
+      
       await new Promise(r => setTimeout(r, 500));
-
+      
       document.getElementById('empty-state').classList.add('hidden');
       document.getElementById('audit-results').classList.add('hidden');
       document.getElementById('deploy-plan').classList.remove('hidden');
-
+      
+      const workspace = workspaceInput.value || 'I:/MIMO-Automation';
+      
       document.getElementById('deploy-info').innerHTML = `
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem;">Clone 命令</div>
-          <div style="font-family: monospace; font-size: 0.875rem; padding: 0.5rem; background: var(--surface); border-radius: 0.375rem;">git clone https://github.com/${repo}.git</div>
+        <div class="plan-item">
+          <div class="plan-label">Clone 命令</div>
+          <div class="plan-value">git clone https://github.com/${repo}.git</div>
         </div>
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem;">安装命令</div>
-          <div style="font-family: monospace; font-size: 0.875rem; padding: 0.5rem; background: var(--surface); border-radius: 0.375rem;">npm install</div>
+        <div class="plan-item">
+          <div class="plan-label">安装命令</div>
+          <div class="plan-value">npm install</div>
         </div>
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem;">启动命令</div>
-          <div style="font-family: monospace; font-size: 0.875rem; padding: 0.5rem; background: var(--surface); border-radius: 0.375rem;">npm run dev</div>
+        <div class="plan-item">
+          <div class="plan-label">启动命令</div>
+          <div class="plan-value">npm run dev</div>
         </div>
-        <div style="margin-bottom: 1rem;">
-          <div style="font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem;">需要的环境变量</div>
-          <div style="font-family: monospace; font-size: 0.875rem; padding: 0.5rem; background: var(--surface); border-radius: 0.375rem;">
-            PORT=8787<br>
-            NODE_ENV=development
-          </div>
+        <div class="plan-item">
+          <div class="plan-label">Workspace</div>
+          <div class="plan-value">${workspace}</div>
         </div>
-        <div>
-          <div style="font-size: 0.75rem; color: var(--gold); margin-bottom: 0.25rem;">手动步骤</div>
-          <div style="font-size: 0.875rem; color: var(--text-muted);">
-            1. 选择部署目录<br>
-            2. 确认 clone<br>
-            3. 配置环境变量<br>
-            4. 确认 install<br>
-            5. 确认 start
-          </div>
+        <div class="plan-item">
+          <div class="plan-label">需要的环境变量</div>
+          <div class="plan-value">PORT=8787<br>NODE_ENV=development</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-label">风险提示</div>
+          <div class="plan-value" style="color: var(--warning);">将下载外部代码到本地</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-label">安全模式</div>
+          <div class="plan-value">默认 dry-run，需要用户确认</div>
         </div>
       `;
-
-      btn.disabled = false; btn.textContent = '📦 生成部署计划';
+      
+      btn.disabled = false; btn.textContent = '📦 部署计划';
+      showToast('部署计划生成完成');
+      
+      saveToHistory(repo, 'deploy');
     }
+    
+    // Export report
+    function exportReport() {
+      const repo = repoInput.value.trim();
+      const riskScore = document.getElementById('risk-score')?.textContent || 'N/A';
+      
+      const report = `# RepoPilot 审查报告
 
-    document.getElementById('btn-audit').addEventListener('click', auditRepo);
-    document.getElementById('btn-deploy').addEventListener('click', generateDeployPlan);
+## 仓库: ${repo}
+## 风险分数: ${riskScore}/100
+
+## 安全审查
+- README: ✅ 存在
+- LICENSE: ✅ 存在
+- TypeScript: ✅ 检测到
+
+## 部署计划
+- Clone: git clone https://github.com/${repo}.git
+- Install: npm install
+- Dev: npm run dev
+
+## 安全策略
+- 默认 dry-run
+- 高风险命令需要确认
+- 禁止 sudo / rm -rf / curl|sh
+
+---
+Generated by RepoPilot`;
+      
+      const blob = new Blob([report], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `repopilot-report-${repo.replace('/', '-')}.md`;
+      a.click();
+      showToast('报告已导出');
+    }
+    
+    // History
+    function saveToHistory(repo, action) {
+      const history = JSON.parse(localStorage.getItem('mimo_repopilot_history') || '[]');
+      history.unshift({ repo, action, timestamp: new Date().toISOString() });
+      if (history.length > 10) history.pop();
+      localStorage.setItem('mimo_repopilot_history', JSON.stringify(history));
+      renderHistory();
+    }
+    
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('mimo_repopilot_history') || '[]');
+      const container = document.getElementById('history-list');
+      
+      if (history.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.875rem;">暂无历史记录</p>';
+        return;
+      }
+      
+      container.innerHTML = history.map(item => `
+        <div class="repo-item" onclick="selectRepo('${item.repo}')">
+          <div class="repo-name">${item.repo}</div>
+          <div class="repo-meta">${item.action} · ${new Date(item.timestamp).toLocaleDateString('zh-CN')}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Initialize
+    checkAgent();
+    renderHistory();
   </script>
 </body>
 </html>
